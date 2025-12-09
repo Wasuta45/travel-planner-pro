@@ -3,77 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>Dashboard - Travel Planner Pro</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
-        body { font-family: 'IBM Plex Sans Thai', sans-serif; }
-        .trip-card img { height: 200px; object-fit: cover; }
-        .trip-card { transition: transform 0.2s; cursor: pointer; }
-        .trip-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .add-trip-btn { border-style: dashed; border-width: 2px; height: 100%; min-height: 300px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #6c757d; cursor: pointer; }
-        .add-trip-btn:hover { background-color: #f8f9fa; color: #0d6efd; border-color: #0d6efd; }
+        /* === Global Styles === */
+        body { 
+            font-family: 'IBM Plex Sans Thai', sans-serif; 
+            background-color: #f8f9fa; 
+            padding-top: 80px; /* เว้นที่ให้ Navbar */
+        }
         
-        /* ปุ่มลบ (จะโผล่มาตอนเอาเมาส์ชี้การ์ด) */
-        .delete-trip-btn {
-            opacity: 0;
-            transition: opacity 0.2s;
+        /* === Navbar === */
+        .navbar { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px); 
+            padding: 15px 50px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
         }
-        .trip-card:hover .delete-trip-btn {
-            opacity: 1;
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #11998e; }
+        .nav-link { color: #555; font-weight: 500; transition: 0.3s; }
+        .nav-link:hover { color: #11998e; }
+
+        /* === Header & Welcome Card === */
+        .welcome-card { 
+            border: none; border-radius: 25px; overflow: hidden; 
+            box-shadow: 0 15px 40px rgba(0,0,0,0.08); margin-bottom: 40px; 
+            position: relative; color: white; height: 300px; 
+            background: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+            display: flex; align-items: center; 
         }
+        .welcome-overlay { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 60%, transparent 100%); 
+        }
+        .welcome-content { position: relative; z-index: 1; padding: 0 60px; max-width: 600px; }
+        
+        /* === Stat Cards === */
+        .stat-card { 
+            background: white; border-radius: 20px; padding: 30px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03); transition: 0.3s; 
+            display: flex; align-items: center; gap: 20px; border: 1px solid white; height: 100%; 
+        }
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #11998e; }
+        .stat-icon { 
+            width: 70px; height: 70px; border-radius: 20px; 
+            background: rgba(17, 153, 142, 0.1); color: #11998e; 
+            display: flex; align-items: center; justify-content: center; font-size: 1.8rem; 
+        }
+
+        /* === Trip List Grid === */
+        /* Card ทริป */
+        .trip-card { 
+            background: white; border: none; border-radius: 20px; overflow: hidden; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.03); transition: 0.4s; height: 100%; 
+            position: relative; text-decoration: none; color: inherit; display: block; 
+            border: 1px solid transparent; 
+        }
+        .trip-card:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(0,0,0,0.1); border-color: #11998e; }
+        
+        .trip-img { 
+            height: 200px; background-color: #eee; background-size: cover; background-position: center; 
+            transition: transform 0.6s; 
+        }
+        .trip-card:hover .trip-img { transform: scale(1.08); }
+        .trip-body { padding: 25px; }
+        
+        /* ป้ายสถานะ (มุมซ้ายบน) */
+        .trip-status { 
+            position: absolute; top: 15px; left: 15px; 
+            background: rgba(255, 255, 255, 0.95); padding: 6px 14px; border-radius: 30px; 
+            font-size: 0.75rem; font-weight: 700; color: #11998e; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); backdrop-filter: blur(4px); 
+        }
+        
+        /* ปุ่มลบ (มุมขวาบน) */
+        .delete-btn { 
+            position: absolute; top: 15px; right: 15px; 
+            background: rgba(255,255,255,0.95); width: 35px; height: 35px; border-radius: 50%; 
+            border: none; display: flex; align-items: center; justify-content: center; 
+            color: #dc3545; box-shadow: 0 4px 10px rgba(0,0,0,0.1); opacity: 0; 
+            transition: 0.3s; z-index: 2; cursor: pointer; 
+        }
+        .trip-card:hover .delete-btn { opacity: 1; transform: translateY(0); }
+        .delete-btn:hover { background: #dc3545; color: white; }
+
+        /* การ์ดสำหรับกดเพิ่มทริป */
+        .add-trip-card { 
+            border: 2px dashed #cbd5e0; background: rgba(255,255,255,0.5); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            color: #a0aec0; min-height: 320px; cursor: pointer; transition: 0.3s; border-radius: 20px; 
+        }
+        .add-trip-card:hover { border-color: #11998e; color: #11998e; background: white; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+
+        /* === Footer & Animations === */
+        .footer { text-align: center; padding: 40px 0; color: #adb5bd; font-size: 0.9rem; margin-top: auto; }
+        .fade-in { animation: fadeIn 0.6s ease-in-out; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+
+        @media (max-width: 768px) { .navbar { padding: 15px 20px; } .welcome-content { padding: 0 20px; } }
     </style>
 </head>
-<body class="bg-light">
-
-    <nav class="navbar navbar-dark bg-primary shadow-sm">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">✈️ Travel Planner Pro</a>
-            <div class="d-flex align-items-center">
-                <span class="navbar-text text-white me-3" id="userDisplay">Loading...</span>
-                <a href="/logout" class="btn btn-sm btn-light text-primary fw-bold">Logout</a>
+<body>
+    
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="fa-solid fa-paper-plane me-2"></i>Travel Planner Pro</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navContent">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">หน้าหลัก</a></li>
+                </ul>
+                <div id="userDisplay" class="d-flex align-items-center"></div>
             </div>
         </div>
     </nav>
 
     <div class="container py-5">
-        <h2 class="mb-4 fw-bold text-secondary">🎒 ทริปของคุณ</h2>
         
-        <div class="row g-4" id="tripList">
+        <div class="welcome-card fade-in">
+            <div class="welcome-overlay"></div>
+            <div class="welcome-content">
+                <h1 class="fw-bold mb-2 display-5">สวัสดี, <span id="userNameTxt">นักเดินทาง</span>!</h1>
+                <p class="fs-5 opacity-75 mb-4">"การเดินทางนับพันลี้ เริ่มต้นที่ก้าวแรกเสมอ" <br>วางแผนทริปต่อไปของคุณกันเถอะ</p>
+                <button class="btn btn-light rounded-pill fw-bold px-4 py-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#addTripModal" style="color: #11998e;">
+                    <i class="fa-solid fa-plus me-2"></i>สร้างทริปใหม่
+                </button>
             </div>
+        </div>
+
+        <div class="row g-4 mb-5 fade-in" style="animation-delay: 0.1s;">
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fa-solid fa-suitcase-rolling"></i></div>
+                    <div><h3 class="fw-bold mb-0 text-dark" id="totalTrips">0</h3><p class="text-muted mb-0 small">ทริปทั้งหมด</p></div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: rgba(255, 193, 7, 0.1); color: #ffc107;"><i class="fa-solid fa-flag-checkered"></i></div>
+                    <div><h3 class="fw-bold mb-0 text-dark" id="pastTrips">0</h3><p class="text-muted mb-0 small">ทริปที่สำเร็จแล้ว</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold text-dark mb-0"><i class="fa-solid fa-map me-2 text-primary"></i>ทริปของคุณ</h4>
+        </div>
+
+        <div class="row g-4" id="tripList">
+            <div class="col-12 text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin fa-2x"></i></div>
+        </div>
+
     </div>
 
+    <div class="footer">© 2024 Travel Planner Pro. ออกแบบเพื่อคนรักการเดินทาง </div>
+
     <div class="modal fade" id="addTripModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">✨ สร้างทริปใหม่</h5>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px;">
+                <div class="modal-header border-0 px-4 pt-4">
+                    <h5 class="modal-title fw-bold text-dark">✨ สร้างทริปใหม่</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     <form id="createTripForm">
                         <div class="mb-3">
-                            <label class="form-label">ชื่อทริป</label>
-                            <input type="text" id="tripName" class="form-control" placeholder="เช่น เที่ยวญี่ปุ่นใบไม้เปลี่ยนสี" required>
+                            <label class="form-label text-muted small fw-bold">ชื่อทริป</label>
+                            <input type="text" id="tripName" class="form-control bg-light border-0 py-3 rounded-4" placeholder="เช่น ญี่ปุ่น 2024" required>
                         </div>
                         <div class="row">
                             <div class="col-6 mb-3">
-                                <label class="form-label">วันเริ่ม</label>
-                                <input type="date" id="startDate" class="form-control" required>
+                                <label class="form-label text-muted small fw-bold">วันเริ่ม</label>
+                                <input type="date" id="startDate" class="form-control bg-light border-0 py-3 rounded-4" required>
                             </div>
                             <div class="col-6 mb-3">
-                                <label class="form-label">วันกลับ</label>
-                                <input type="date" id="endDate" class="form-control" required>
+                                <label class="form-label text-muted small fw-bold">วันกลับ</label>
+                                <input type="date" id="endDate" class="form-control bg-light border-0 py-3 rounded-4" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">รูปปก (URL)</label>
-                            <input type="url" id="coverImage" class="form-control" placeholder="https://example.com/image.jpg">
-                            <div class="form-text">หา URL รูปจาก Google มาวางได้เลย</div>
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold">รูปปก (URL)</label>
+                            <input type="url" id="coverImage" class="form-control bg-light border-0 py-3 rounded-4" placeholder="https://...">
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">บันทึกทริป</button>
+                        <button type="submit" class="btn w-100 rounded-pill py-3 fw-bold text-white shadow-sm" style="background: linear-gradient(90deg, #11998e, #38ef7d); border:none;">เริ่มต้นวางแผน</button>
                     </form>
                 </div>
             </div>
@@ -81,125 +201,160 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
-        // 1. โหลดข้อมูลทริปทันทีที่เปิดหน้าเว็บ
-        async function loadTrips() {
-            try {
-                const response = await fetch('/api/my-trips');
-                
-                if (response.status === 401) {
-                    window.location.href = '/login.html';
-                    return;
-                }
-
-                const data = await response.json();
-                
-                // แสดงชื่อ User
-                document.getElementById('userDisplay').innerHTML = `สวัสดี, <b>${data.username}</b>`;
-
-                // วนลูปสร้าง Card ทริป
-                const tripList = document.getElementById('tripList');
-                tripList.innerHTML = ''; 
-
-                // การ์ดทริปแต่ละอัน
-                data.trips.forEach(trip => {
-                    const html = `
-                        <div class="col-md-4">
-                            <div class="card trip-card h-100 shadow-sm position-relative">
-                                
-                                <button class="btn btn-danger btn-sm position-absolute top-0 end-0 m-2 delete-trip-btn" 
-                                        onclick="deleteTrip(${trip.id}, event)" 
-                                        style="z-index: 10;"
-                                        title="ลบทริปนี้">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-
-                                <a href="/trip-detail.html?id=${trip.id}" class="text-decoration-none text-dark h-100 d-flex flex-column">
-                                    <img src="${trip.cover_image || 'https://via.placeholder.com/400x200?text=No+Image'}" class="card-img-top" alt="Trip Cover">
-                                    <div class="card-body flex-grow-1">
-                                        <h5 class="card-title fw-bold">${trip.name}</h5>
-                                        <p class="card-text text-muted small">
-                                            <i class="fa-regular fa-calendar"></i> 
-                                            ${new Date(trip.start_date).toLocaleDateString('th-TH')} - 
-                                            ${new Date(trip.end_date).toLocaleDateString('th-TH')}
-                                        </p>
-                                    </div>
-                                    <div class="card-footer bg-white border-top-0">
-                                        <button class="btn btn-outline-primary w-100 btn-sm">ดูแผนที่ & รายละเอียด</button>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    `;
-                    tripList.innerHTML += html;
-                });
-
-                // ปุ่ม + สร้างทริป (เอาไว้ท้ายสุดเสมอ)
-                tripList.innerHTML += `
-                    <div class="col-md-4">
-                        <div class="card add-trip-btn" data-bs-toggle="modal" data-bs-target="#addTripModal">
-                            <i class="fa-solid fa-circle-plus fa-4x mb-3 text-secondary"></i>
-                            <h5 class="fw-bold text-secondary">สร้างทริปใหม่</h5>
-                        </div>
-                    </div>
-                `;
-
-            } catch (err) {
-                console.error(err);
-                alert('โหลดข้อมูลไม่สำเร็จ');
-            }
-        }
-
-        // 2. จัดการฟอร์มสร้างทริป
-        document.getElementById('createTripForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                name: document.getElementById('tripName').value,
-                start_date: document.getElementById('startDate').value,
-                end_date: document.getElementById('endDate').value,
-                cover_image: document.getElementById('coverImage').value
-            };
-
-            await fetch('/api/trips', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-
-            // ปิด Modal และโหลดข้อมูลใหม่
-            const modalEl = document.getElementById('addTripModal');
-            const modal = bootstrap.Modal.getInstance(modalEl);
-            modal.hide();
-            
-            // เคลียร์ฟอร์ม
-            document.getElementById('createTripForm').reset();
-            loadTrips(); 
+        // --- 1. โหลดข้อมูลเมื่อเปิดหน้าเว็บ ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadUserData();
+            loadTrips();
         });
 
-        // 3. ฟังก์ชันลบทริป (Delete Trip)
-        async function deleteTrip(id, event) {
-            // หยุดไม่ให้ event ทะลุไปกดลิงก์เข้าหน้า detail
-            event.stopPropagation();
-            event.preventDefault(); 
-
-            if (!confirm('⚠️ คุณต้องการลบทริปนี้ใช่ไหม? ')) return;
-
+        // --- 2. ฟังก์ชันโหลดข้อมูลผู้ใช้ ---
+        async function loadUserData() {
             try {
-                const res = await fetch(`/api/trips/${id}`, { method: 'DELETE' });
-                if (res.ok) {
-                    loadTrips(); // โหลดใหม่ ทริปจะหายไป
-                } else {
-                    alert('ลบไม่สำเร็จ');
-                }
-            } catch (err) {
-                console.error(err);
-                alert('เกิดข้อผิดพลาด');
-            }
+                const res = await fetch('/api/user/me');
+                if (res.status === 401) { window.location.href = '/login.html'; return; }
+                
+                const user = await res.json();
+                
+                // สร้าง Avatar จาก Seed
+                const seed = user.avatar_seed || user.username;
+                const avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
+
+                // แสดงชื่อบน Banner
+                document.getElementById('userNameTxt').innerText = user.username;
+
+                // แสดง Dropdown มุมขวาบน
+                document.getElementById('userDisplay').innerHTML = `
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                            <img src="${avatarUrl}" style="width:40px;height:40px;border-radius:50%;margin-right:10px;border:2px solid #fff; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                            ${user.username}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 p-2 rounded-4">
+                            <li><a class="dropdown-item rounded-3" href="/profile.html"><i class="fa-solid fa-user me-2 text-muted"></i>โปรไฟล์</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item rounded-3 text-danger" href="/logout"><i class="fa-solid fa-right-from-bracket me-2"></i>ออกจากระบบ</a></li>
+                        </ul>
+                    </div>`;
+            } catch(e) { console.error("Load User Error:", e); }
         }
 
-        // เริ่มทำงาน
-        loadTrips();
+        // --- 3. ฟังก์ชันโหลดรายการทริป ---
+        async function loadTrips() {
+            try {
+                const res = await fetch('/api/my-trips');
+                if (!res.ok) return; // ถ้า Error (เช่นยังไม่ล็อกอิน) ให้หยุด
+                const data = await res.json();
+                
+                // คำนวณ Stats
+                const now = new Date();
+                const pastTripsCount = data.trips.filter(t => new Date(t.end_date) < now).length;
+                
+                document.getElementById('totalTrips').innerText = data.trips.length;
+                document.getElementById('pastTrips').innerText = pastTripsCount;
+
+                // Render List
+                const list = document.getElementById('tripList');
+                list.innerHTML = '';
+
+                // การ์ดปุ่ม "+" (ใบแรกสุด)
+                list.innerHTML += `
+                    <div class="col-md-4 col-sm-6 fade-in">
+                        <div class="add-trip-card" data-bs-toggle="modal" data-bs-target="#addTripModal">
+                            <div style="background:#e0f2f1; padding:20px; border-radius:50%; margin-bottom:15px; color:#11998e;">
+                                <i class="fa-solid fa-plus fa-2x"></i>
+                            </div>
+                            <h5 class="fw-bold mb-1">สร้างทริปใหม่</h5>
+                            <small>เริ่มวางแผนการเดินทาง</small>
+                        </div>
+                    </div>`;
+
+                // Loop สร้างการ์ดทริป
+                data.trips.forEach(t => {
+                    const cover = t.cover_image || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80';
+                    const sDate = new Date(t.start_date);
+                    const eDate = new Date(t.end_date);
+                    
+                    // คำนวณจำนวนวัน
+                    const days = Math.ceil((eDate - sDate) / (1000 * 60 * 60 * 24)) + 1;
+                    
+                    // เช็คสถานะ (จบแล้ว หรือ เร็วๆ นี้)
+                    let status = '<span class="trip-status" style="color:#11998e;"><i class="fa-solid fa-plane-up me-1"></i> เร็วๆ นี้</span>';
+                    if (eDate < now) status = '<span class="trip-status" style="color:#6c757d;"><i class="fa-solid fa-check-circle me-1"></i> จบแล้ว</span>';
+
+                    list.innerHTML += `
+                        <div class="col-md-4 col-sm-6 fade-in">
+                            <a href="/trip-detail.html?id=${t.id}" class="trip-card">
+                                ${status}
+                                <button class="delete-btn" onclick="deleteTrip(${t.id}, event)"><i class="fa-solid fa-trash"></i></button>
+                                
+                                <div class="trip-img" style="background-image: url('${cover}');"></div>
+                                
+                                <div class="trip-body">
+                                    <h5 class="fw-bold mb-2 text-truncate text-dark" style="font-size:1.1rem;">${t.name}</h5>
+                                    <div class="d-flex justify-content-between align-items-center text-muted small">
+                                        <span><i class="fa-regular fa-calendar me-2"></i>${sDate.toLocaleDateString('th-TH')}</span>
+                                        <span class="badge bg-light text-dark border"><i class="fa-regular fa-clock me-1"></i>${days} วัน</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>`;
+                });
+
+            } catch(e) { console.error("Load Trip Error:", e); }
+        }
+
+        // --- 4. ฟังก์ชันสร้างทริปใหม่ ---
+        document.getElementById('createTripForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = { 
+                name: document.getElementById('tripName').value, 
+                start_date: document.getElementById('startDate').value, 
+                end_date: document.getElementById('endDate').value, 
+                cover_image: document.getElementById('coverImage').value 
+            };
+
+            try {
+                const res = await fetch('/api/trips', { 
+                    method:'POST', 
+                    headers:{'Content-Type':'application/json'}, 
+                    body:JSON.stringify(payload) 
+                });
+
+                if(res.ok) {
+                    bootstrap.Modal.getInstance(document.getElementById('addTripModal')).hide();
+                    document.getElementById('createTripForm').reset();
+                    loadTrips(); // โหลดข้อมูลใหม่
+                    Swal.fire({ icon: 'success', title: 'สร้างทริปสำเร็จ', timer: 1500, showConfirmButton: false });
+                }
+            } catch(err) { Swal.fire('Error', 'เกิดข้อผิดพลาด', 'error'); }
+        });
+
+        // --- 5. ฟังก์ชันลบทริป ---
+        async function deleteTrip(id, e) {
+            e.stopPropagation(); // ป้องกันไม่ให้คลิกแล้วลิงก์ไปหน้า Detail
+            e.preventDefault();
+            
+            const result = await Swal.fire({ 
+                title: 'ลบทริป?', 
+                text:'กู้คืนไม่ได้นะ', 
+                icon: 'warning', 
+                showCancelButton: true, 
+                confirmButtonColor: '#d33', 
+                confirmButtonText: 'ลบเลย',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if(result.isConfirmed) {
+                const res = await fetch(`/api/trips/${id}`, { method: 'DELETE' });
+                if(res.ok) { 
+                    loadTrips(); 
+                    Swal.fire('ลบแล้ว', 'ทริปถูกลบเรียบร้อย', 'success'); 
+                }
+            }
+        }
     </script>
 </body>
 </html>

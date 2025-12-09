@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โปรไฟล์ของฉัน - Travel Planner Pro</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* === Global Styles === */
+        body { 
+            font-family: 'IBM Plex Sans Thai', sans-serif; 
+            background-color: #f8f9fa; 
+            padding-top: 80px; 
+        }
+        
+        /* === Navbar === */
+        .navbar { 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); 
+            padding: 15px 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+        }
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #11998e; }
+        .nav-link { color: #555; font-weight: 500; transition: 0.3s; }
+        .nav-link:hover { color: #11998e; }
+
+        /* === Left Column: Profile Card === */
+        .profile-card {
+            background: white; border-radius: 20px; border: none; overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center;
+            position: sticky; top: 100px;
+        }
+        .profile-cover {
+            height: 150px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            position: relative;
+        }
+        .profile-avatar-wrapper {
+            position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%);
+            width: 120px; height: 120px;
+        }
+        .profile-avatar {
+            width: 100%; height: 100%; border-radius: 50%;
+            border: 5px solid white; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            background: white; object-fit: cover; transition: 0.3s;
+        }
+
+        .profile-info { padding: 70px 30px 30px; }
+        .profile-name { font-weight: 700; font-size: 1.5rem; margin-bottom: 10px; color: #2c3e50; }
+        
+        .profile-stats {
+            display: flex; justify-content: center; gap: 30px; margin-bottom: 25px;
+            padding: 15px 0; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0;
+        }
+        .stat-item h4 { font-weight: 800; margin: 0; color: #11998e; }
+        .stat-item span { font-size: 0.85rem; color: #999; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* Menu Buttons */
+        .menu-btn {
+            width: 100%; text-align: left; padding: 12px 20px; border-radius: 12px;
+            background: transparent; border: none; color: #555; font-weight: 500;
+            display: flex; align-items: center; justify-content: space-between;
+            transition: 0.2s; margin-bottom: 5px;
+        }
+        .menu-btn:hover { background: #f8f9fa; color: #11998e; }
+        .menu-btn i { width: 25px; }
+
+        /* === Right Column: Trip Gallery === */
+        .content-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .tab-pills { display: flex; gap: 10px; }
+        .tab-pill { 
+            padding: 8px 20px; border-radius: 30px; font-weight: 600; font-size: 0.9rem; 
+            cursor: pointer; border: 1px solid transparent; transition: 0.3s; color: #6c757d; background: white; 
+        }
+        .tab-pill.active { background: #11998e; color: white; box-shadow: 0 5px 15px rgba(17, 153, 142, 0.2); }
+
+        .trip-gallery-card {
+            background: white; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.03); transition: 0.3s;
+            margin-bottom: 25px; border: 1px solid #f0f0f0;
+            display: flex; height: 220px; cursor: pointer;
+        }
+        .trip-gallery-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.08); border-color: #11998e; }
+        .gallery-img { width: 40%; height: 100%; object-fit: cover; background-color: #eee; }
+        .gallery-body { width: 60%; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
+        .gallery-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 10px; color: #2c3e50; }
+        .gallery-meta { color: #6c757d; font-size: 0.95rem; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; }
+        .gallery-footer { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
+        .btn-view { color: #11998e; font-weight: 700; text-decoration: none; font-size: 0.95rem; }
+        .btn-view:hover { text-decoration: underline; }
+
+        /* === Modal: Edit Profile === */
+        .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 20px; }
+        .avatar-option {
+            border-radius: 50%; border: 3px solid #f8f9fa; cursor: pointer; transition: 0.2s;
+            background: #f8f9fa; position: relative;
+        }
+        .avatar-option img { width: 100%; border-radius: 50%; }
+        .avatar-option:hover { transform: scale(1.1); }
+        .avatar-option.selected { border-color: #11998e; box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.2); }
+
+        @media (max-width: 768px) {
+            .trip-gallery-card { flex-direction: column; height: auto; }
+            .gallery-img { width: 100%; height: 200px; }
+            .gallery-body { width: 100%; }
+            .profile-card { position: static; margin-bottom: 30px; }
+            .avatar-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="fa-solid fa-paper-plane me-2"></i>Travel Planner Pro</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="/">หน้าหลัก</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dashboard.html">Dashboard</a></li>
+                </ul>
+                <div class="d-flex align-items-center" id="navAuthSection"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row">
+            
+            <div class="col-lg-4">
+                <div class="profile-card">
+                    <div class="profile-cover">
+                        <div class="profile-avatar-wrapper">
+                            <img id="avatar" src="" class="profile-avatar">
+                        </div>
+                    </div>
+                    
+                    <div class="profile-info">
+                        <h3 class="profile-name" id="username">Loading...</h3>
+                        <p class="text-muted small mb-4" id="bio" style="font-style: italic;">"..."</p>
+
+                        <div class="profile-stats">
+                            <div class="stat-item">
+                                <h4 id="statTrips">0</h4>
+                                <span>ทริป</span>
+                            </div>
+                            <div class="stat-item">
+                                <h4 id="memberSince">...</h4>
+                                <span>สมาชิกตั้งแต่ปี</span>
+                            </div>
+                        </div>
+
+                        <div class="text-start">
+                            <button class="menu-btn" onclick="openEditProfile()">
+                                <span><i class="fa-solid fa-user-pen"></i> แก้ไขข้อมูลส่วนตัว</span>
+                                <i class="fa-solid fa-chevron-right text-muted small"></i>
+                            </button>
+
+                            <button class="menu-btn" data-bs-toggle="modal" data-bs-target="#changePassModal">
+                                <span><i class="fa-solid fa-key"></i> เปลี่ยนรหัสผ่าน</span>
+                                <i class="fa-solid fa-chevron-right text-muted small"></i>
+                            </button>
+                            <button class="menu-btn text-danger" onclick="location.href='/logout'">
+                                <span><i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="content-header">
+                    <h3 class="fw-bold m-0 text-dark">บันทึกการเดินทาง</h3>
+                    <div class="tab-pills">
+                        <div class="tab-pill active">ทริปทั้งหมด</div>
+                    </div>
+                </div>
+
+                <div id="tripList">
+                    <div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลดข้อมูล...</div>
+                </div>
+                
+                <div id="emptyState" class="text-center py-5 d-none">
+                    <img src="https://cdn-icons-png.flaticon.com/512/7486/7486747.png" width="120" style="opacity:0.5; margin-bottom:20px;">
+                    <h5 class="text-muted">คุณยังไม่มีทริปการเดินทาง</h5>
+                    <a href="/dashboard.html" class="btn btn-outline-primary rounded-pill mt-3">เริ่มสร้างทริปแรก</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editProfileModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <h5 class="modal-title fw-bold">✏️ แก้ไขข้อมูลส่วนตัว</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    
+                    <label class="form-label fw-bold text-muted small mb-2">เลือกตัวละครแทนตัวคุณ</label>
+                    <div class="avatar-grid" id="avatarGrid">
+                        </div>
+
+                    <label class="form-label fw-bold text-muted small mt-3 mb-2">คำแนะนำตัว (Bio)</label>
+                    <textarea id="editBioInput" class="form-control bg-light border-0 py-3 rounded-3" rows="3" placeholder="เขียนแนะนำตัวสั้นๆ..."></textarea>
+                    
+                    <button onclick="saveProfile()" class="btn btn-primary w-100 rounded-pill fw-bold mt-4 py-2" style="background: linear-gradient(90deg, #11998e, #38ef7d); border:none;">บันทึกการเปลี่ยนแปลง</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="changePassModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow" style="border-radius: 20px;">
+                <div class="modal-header border-0 pb-0 px-4 pt-4">
+                    <h5 class="modal-title fw-bold">🔐 เปลี่ยนรหัสผ่าน</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="passForm">
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold">รหัสผ่านปัจจุบัน</label>
+                            <input type="password" id="oldPass" class="form-control bg-light border-0 py-2 rounded-3" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label small text-muted fw-bold">รหัสผ่านใหม่</label>
+                            <input type="password" id="newPass" class="form-control bg-light border-0 py-2 rounded-3" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 rounded-pill fw-bold" style="background: linear-gradient(90deg, #11998e, #38ef7d); border:none;">ยืนยัน</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script>
+        // --- Variables ---
+        let editModal = null;
+        let selectedAvatarSeed = '';
+        const avatars = ['Felix', 'Aneka', 'Jack', 'Precious', 'Sassy', 'Misty', 'George', 'Boots'];
+
+        // --- 1. Load Profile & Trips ---
+        async function loadProfile() {
+            try {
+                // Fetch User
+                const res = await fetch('/api/user/me');
+                if(res.status === 401) { window.location.href='/login.html'; return; }
+                const user = await res.json();
+                
+                // Logic: Avatar & Seed
+                const currentSeed = user.avatar_seed || user.username;
+                selectedAvatarSeed = currentSeed; // เก็บค่าเริ่มต้นไว้
+                const avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${currentSeed}`;
+
+                // Update UI: Navbar
+                document.getElementById('navAuthSection').innerHTML = `
+                    <div class="dropdown">
+                        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                            <img src="${avatarUrl}" style="width:35px;height:35px;border-radius:50%;margin-right:10px;border:1px solid #eee;"> 
+                            ${user.username}
+                        </a>
+                        <ul class="dropdown-menu border-0 shadow-sm mt-2">
+                            <li><a class="dropdown-item text-danger" href="/logout">ออกจากระบบ</a></li>
+                        </ul>
+                    </div>`;
+
+                // Update UI: Profile Card
+                document.getElementById('username').innerText = user.username;
+                document.getElementById('bio').innerText = user.bio || '"เขียนแนะนำตัวสั้นๆ..."';
+                document.getElementById('avatar').src = avatarUrl;
+                
+                // Logic: Member Since (ปีที่สมัคร)
+                if (user.created_at) {
+                    const year = new Date(user.created_at).getFullYear();
+                    document.getElementById('memberSince').innerText = year;
+                } else {
+                    document.getElementById('memberSince').innerText = new Date().getFullYear();
+                }
+
+                // Fetch Trips
+                const tripsRes = await fetch('/api/my-trips');
+                const tripsData = await tripsRes.json();
+                
+                document.getElementById('statTrips').innerText = tripsData.trips.length;
+                renderTripList(tripsData.trips);
+
+            } catch(e) { console.error("Error loading profile:", e); }
+        }
+
+        // --- 2. Render Functions ---
+        function renderTripList(trips) {
+            const list = document.getElementById('tripList');
+            list.innerHTML = '';
+
+            if (trips.length === 0) {
+                document.getElementById('emptyState').classList.remove('d-none');
+            } else {
+                document.getElementById('emptyState').classList.add('d-none');
+                trips.forEach(t => {
+                    const cover = t.cover_image || 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80';
+                    const sDate = new Date(t.start_date).toLocaleDateString('th-TH');
+                    const eDate = new Date(t.end_date).toLocaleDateString('th-TH');
+                    
+                    list.innerHTML += `
+                        <div class="trip-gallery-card fade-in" onclick="location.href='/trip-detail.html?id=${t.id}'">
+                            <img src="${cover}" class="gallery-img">
+                            <div class="gallery-body">
+                                <h4 class="gallery-title">${t.name}</h4>
+                                <div class="gallery-meta">
+                                    <span><i class="fa-regular fa-calendar-alt"></i> ${sDate} - ${eDate}</span>
+                                </div>
+                                <div class="gallery-footer">
+                                    <span class="btn-view">ดูทริป <i class="fa-solid fa-arrow-right ms-1"></i></span>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            }
+        }
+
+        // --- 3. Edit Profile Logic ---
+        function openEditProfile() {
+            if(!editModal) editModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
+            
+            // Set current Bio
+            const currentBio = document.getElementById('bio').innerText.replace(/"/g, '');
+            document.getElementById('editBioInput').value = (currentBio === 'เขียนแนะนำตัวสั้นๆ...' ? '' : currentBio);
+
+            // Generate Avatar Grid
+            const grid = document.getElementById('avatarGrid');
+            grid.innerHTML = '';
+            avatars.forEach(seed => {
+                const isSelected = (seed === selectedAvatarSeed) ? 'selected' : '';
+                grid.innerHTML += `
+                    <div class="avatar-option ${isSelected}" onclick="selectAvatarInModal('${seed}', this)">
+                        <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}">
+                    </div>`;
+            });
+
+            editModal.show();
+        }
+
+        function selectAvatarInModal(seed, element) {
+            selectedAvatarSeed = seed;
+            document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+
+        async function saveProfile() {
+            const newBio = document.getElementById('editBioInput').value;
+            
+            try {
+                // Parallel requests: Save Bio & Avatar
+                await Promise.all([
+                    fetch('/api/user/edit-profile', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({bio: newBio}) }),
+                    fetch('/api/user/update-avatar', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ seed: selectedAvatarSeed }) })
+                ]);
+
+                editModal.hide();
+                loadProfile(); // Reload Profile to show changes
+                Swal.fire({icon:'success', title:'บันทึกเรียบร้อย!', showConfirmButton:false, timer:1500});
+
+            } catch(e) { console.error(e); Swal.fire('Error', 'บันทึกไม่สำเร็จ', 'error'); }
+        }
+
+        // --- 4. Change Password Logic ---
+        document.getElementById('passForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const o = document.getElementById('oldPass').value;
+            const n = document.getElementById('newPass').value;
+            
+            try {
+                const res = await fetch('/api/user/change-password', { 
+                    method:'POST', headers:{'Content-Type':'application/json'}, 
+                    body:JSON.stringify({oldPassword:o, newPassword:n}) 
+                });
+                const d = await res.json();
+                
+                bootstrap.Modal.getInstance(document.getElementById('changePassModal')).hide();
+                
+                if (d.success) {
+                    document.getElementById('passForm').reset();
+                    Swal.fire('สำเร็จ', 'เปลี่ยนรหัสผ่านเรียบร้อยแล้ว', 'success');
+                } else {
+                    Swal.fire('ผิดพลาด', d.message, 'error');
+                }
+            } catch(err) { Swal.fire('Error', 'เกิดข้อผิดพลาด', 'error'); }
+        });
+
+        // Initialize
+        loadProfile();
+    </script>
+</body>
+</html>

@@ -3,102 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trip Details</title>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <title>รายละเอียดทริป - Travel Planner Pro</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
     
     <style>
-        body { font-family: 'IBM Plex Sans Thai', sans-serif; }
-        #map { height: 500px; border-radius: 10px; border: 2px solid #ddd; }
-        .place-item { cursor: pointer; transition: 0.2s; }
-        .place-item:hover { background-color: #f0f8ff; }
-        .total-budget-badge { font-size: 1rem; background-color: #198754; color: white; padding: 5px 10px; border-radius: 20px; }
-        .delete-btn { opacity: 0.5; transition: 0.2s; }
-        .place-item:hover .delete-btn { opacity: 1; }
+        /* === Global Styles === */
+        body { 
+            font-family: 'IBM Plex Sans Thai', sans-serif; 
+            background-color: #f8f9fa; 
+            padding-top: 80px; 
+        }
+        
+        /* === Navbar === */
+        .navbar { 
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); 
+            padding: 15px 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); 
+        }
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: #11998e; }
+        .nav-link { color: #555; font-weight: 500; transition: 0.3s; }
+
+        /* === Trip Header (Hero) === */
+        .trip-header { 
+            position: relative; height: 300px; border-radius: 25px; overflow: hidden; 
+            margin-bottom: 30px; background-color: #333; color: white; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+        }
+        .trip-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.85; transition: 0.5s; }
+        .trip-info { 
+            position: absolute; bottom: 0; left: 0; padding: 40px; width: 100%; 
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); 
+        }
+
+        /* === Map Section === */
+        #map { 
+            height: 600px; width: 100%; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1; border: 5px solid white; 
+        }
+        .map-add-mode { cursor: crosshair !important; border-color: #11998e !important; }
+        /* ซ่อนกล่อง Route Instructions ของ Plugin (เราดึงแค่ค่ามาแสดงเอง) */
+        .leaflet-routing-container { display: none !important; }
+        
+        .btn-locate { 
+            position: absolute; bottom: 30px; right: 30px; width: 50px; height: 50px; 
+            background: white; border: none; border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.2); 
+            z-index: 1000; cursor: pointer; color: #333; display: flex; align-items: center; justify-content: center; 
+            transition: 0.2s; 
+        }
+        .btn-locate:hover { transform: scale(1.1); color: #11998e; }
+
+        /* === Timeline & Cards === */
+        .timeline { position: relative; padding-left: 20px; border-left: 3px solid #e9ecef; margin-left: 10px; }
+        .timeline-item { position: relative; margin-bottom: 25px; padding-left: 25px; cursor: pointer; transition: 0.2s; }
+        .timeline-item:hover { transform: translateX(5px); }
+        
+        /* จุดกลมๆ หน้า Timeline */
+        .timeline-item::before { 
+            content: ''; position: absolute; left: -29px; top: 15px; width: 16px; height: 16px; 
+            border-radius: 50%; background: #fff; border: 4px solid #11998e; z-index: 2; 
+        }
+        
+        .timeline-card { 
+            background: white; border-radius: 15px; padding: 20px; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; transition: 0.2s;
+        }
+        .timeline-card:hover { border-color: #11998e; box-shadow: 0 10px 20px rgba(0,0,0,0.08); }
+        .price-tag { background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; }
+        
+        /* Stats Badges */
+        .stats-badge { 
+            background: white; padding: 8px 15px; border-radius: 50px; font-size: 0.9rem; 
+            border: 1px solid #eee; margin-right: 5px; color: #555; 
+            display: inline-flex; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+        }
+        .stats-badge i { margin-right: 5px; color: #11998e; }
+
+        /* Reviews in Modal */
+        .review-item { border-bottom: 1px solid #f0f0f0; padding: 15px 0; }
+        .review-avatar { width: 40px; height: 40px; border-radius: 50%; border: 1px solid #eee; margin-right: 15px; }
+
+        @media (max-width: 768px) { 
+            .navbar { padding: 15px 20px; } 
+            .trip-header { height: 200px; } 
+            #map { height: 400px; }
+        }
     </style>
 </head>
-<body class="bg-light">
-
-    <nav class="navbar navbar-dark bg-primary mb-4 shadow-sm">
-        <div class="container">
-            <a class="navbar-brand" href="/dashboard.html"><i class="fa-solid fa-arrow-left"></i> กลับ Dashboard</a>
-            <span class="navbar-text text-white fw-bold fs-5" id="tripTitle">Loading...</span>
+<body>
+    
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/"><i class="fa-solid fa-paper-plane me-2"></i>Travel Planner Pro</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto"></ul>
+                <div class="d-flex align-items-center" id="navAuthSection"></div>
+                <a href="/dashboard.html" class="btn btn-outline-dark btn-sm rounded-pill fw-bold ms-2 px-3">
+                    <i class="fa-solid fa-arrow-left me-1"></i> กลับ Dashboard
+                </a>
+            </div>
         </div>
     </nav>
 
-    <div class="container-fluid px-4">
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="card shadow-sm h-100">
-                    <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
-                        <span class="fw-bold"><i class="fa-solid fa-list-check"></i> รายการเที่ยว</span>
-                        <span class="total-budget-badge">รวม: <span id="totalBudget">0</span> ฿</span>
-                    </div>
-                    <div class="card-body overflow-auto p-0" style="max-height: 500px;" id="placeList">
-                        <div class="text-center text-muted mt-5">
-                            <i class="fa-solid fa-map-location-dot fa-3x mb-3"></i>
-                            <p>ยังไม่มีสถานที่<br>ลองจิ้มบนแผนที่ หรือค้นหาเพื่อเพิ่ม!</p>
-                        </div>
+    <div class="container py-4">
+        
+        <div class="trip-header">
+            <img id="tripCover" src="" class="trip-bg">
+            <div class="trip-info">
+                <h1 id="tripTitle" class="fw-bold mb-1 display-5">Loading...</h1>
+                <p id="tripDate" class="mb-0 text-white-50 fs-5"><i class="fa-solid fa-calendar me-2"></i>...</p>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-4 order-2 order-lg-1">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold text-secondary mb-0">🗺️ แผนการเดินทาง</h4>
+                    <span id="totalCost" class="badge bg-success rounded-pill fs-6 p-2 px-3">0 ฿</span>
+                </div>
+
+                <div id="routeStats" class="mb-4" style="display:none;">
+                    <div class="d-flex flex-wrap gap-2">
+                        <div class="stats-badge" title="ระยะทางขับรถ"><i class="fa-solid fa-route"></i> <span id="distVal">0 km</span></div>
+                        <div class="stats-badge" title="เวลาขับรถ"><i class="fa-solid fa-clock"></i> <span id="timeVal">0 min</span></div>
                     </div>
                 </div>
+                
+                <div id="placeList" class="timeline">
+                    <div class="text-center py-5 text-muted"><i class="fa-solid fa-spinner fa-spin"></i> กำลังโหลด...</div>
+                </div>
+
+                <button id="btnAddPlace" class="btn btn-outline-primary w-100 rounded-pill py-3 border-2 fw-bold border-dashed mt-2" onclick="activateMapSelection()" style="border-style: dashed;">
+                    <i class="fa-solid fa-location-dot me-1"></i> จิ้มบนแผนที่เพื่อเพิ่มสถานที่
+                </button>
             </div>
 
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-body p-0 position-relative">
-                        <div id="map"></div>
-                        
-                        <button id="locateBtn" class="btn btn-light shadow border" 
-                                style="position: absolute; bottom: 20px; right: 20px; z-index: 1000; border-radius: 50%; width: 50px; height: 50px;"
-                                title="ตำแหน่งปัจจุบันของคุณ">
-                            <i class="fa-solid fa-location-crosshairs fa-lg text-primary"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="alert alert-info mt-2 shadow-sm">
-                    <i class="fa-solid fa-circle-info"></i> <b>วิธีใช้:</b> กดปุ่ม 🔍 บนแผนที่เพื่อค้นหา หรือคลิกที่จุดใดก็ได้เพื่อเพิ่มสถานที่
-                </div>
+            <div class="col-lg-8 order-1 order-lg-2 position-relative">
+                <div id="map"></div>
+                <button class="btn-locate" onclick="locateMe()" title="ตำแหน่งปัจจุบัน"><i class="fa-solid fa-location-crosshairs"></i></button>
             </div>
         </div>
     </div>
 
     <div class="modal fade" id="addPlaceModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">📌 เพิ่มสถานที่ใหม่</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-primary text-white border-0">
+                    <h5 class="modal-title fw-bold">📍 ปักหมุดสถานที่ใหม่</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <form id="addPlaceForm">
-                    <div class="modal-body">
-                        <input type="hidden" id="latInput">
-                        <input type="hidden" id="lngInput">
+                    <div class="modal-body p-4">
+                        <div class="alert alert-info small rounded-3 border-0 bg-info-subtle text-info-emphasis">
+                            <i class="fa-solid fa-check-circle me-1"></i> พิกัดถูกเลือกเรียบร้อย กรอกรายละเอียดได้เลย
+                        </div>
+                        <input type="hidden" id="lat"><input type="hidden" id="lng">
                         <div class="mb-3">
-                            <label class="form-label">ชื่อสถานที่</label>
-                            <input type="text" id="placeName" class="form-control" required placeholder="เช่น ร้านกาแฟ, วัด..." autofocus>
+                            <label class="form-label fw-bold">ชื่อสถานที่</label>
+                            <input type="text" id="pName" class="form-control bg-light border-0" required placeholder="เช่น วัดพระแก้ว, ร้านกาแฟ...">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">รายละเอียด</label>
-                            <textarea id="placeDesc" class="form-control" rows="2" placeholder="บันทึกช่วยจำ..."></textarea>
+                            <label class="form-label fw-bold">รายละเอียด</label>
+                            <textarea id="pDesc" class="form-control bg-light border-0" rows="2" placeholder="โน้ตช่วยจำ..."></textarea>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">ค่าใช้จ่าย (บาท)</label>
-                            <div class="input-group">
-                                <span class="input-group-text">฿</span>
-                                <input type="number" id="placePrice" class="form-control" placeholder="0" min="0">
-                            </div>
+                            <label class="form-label fw-bold">ค่าใช้จ่าย (บาท)</label>
+                            <input type="number" id="pPrice" class="form-control bg-light border-0" value="0">
                         </div>
-                        <div class="text-muted small text-end">พิกัด: <span id="coordDisplay"></span></div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
-                        <button type="submit" class="btn btn-primary">บันทึกข้อมูล</button>
+                    <div class="modal-footer border-0 px-4 pb-4">
+                        <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">ยกเลิก</button>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" style="background: #11998e; border:none;">บันทึก</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="placeDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 25px; overflow: hidden;">
+                <div style="height: 250px; overflow: hidden; position: relative; background: #eee;">
+                    <img id="detailImg" src="https://via.placeholder.com/800x400?text=Travel+Photo" style="width: 100%; height: 100%; object-fit: cover;">
+                    <button type="button" class="btn-close btn-close-white position-absolute top-0 end-0 m-4" data-bs-dismiss="modal"></button>
+                    <div class="position-absolute bottom-0 start-0 w-100 p-4" style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
+                        <h2 id="detailName" class="text-white fw-bold mb-1"></h2>
+                        <span id="detailPrice" class="badge bg-success rounded-pill"></span>
+                    </div>
+                </div>
+                
+                <div class="modal-body p-4">
+                    <p id="detailDesc" class="text-muted fs-5 mb-4"></p>
+                    
+                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                        <h5 class="fw-bold m-0"><i class="fa-regular fa-comments me-2"></i>รีวิวจากชุมชน</h5>
+                        <button id="btnWriteReview" class="btn btn-sm btn-outline-primary rounded-pill d-none" onclick="togglePlaceReviewForm()">เขียนรีวิว</button>
+                    </div>
+
+                    <div id="placeReviewForm" class="mb-4 p-3 bg-light rounded-4 d-none">
+                        <div class="mb-2 text-warning fs-4" style="cursor: pointer;">
+                            <i class="fa-regular fa-star" onclick="setPlaceRating(1)"></i>
+                            <i class="fa-regular fa-star" onclick="setPlaceRating(2)"></i>
+                            <i class="fa-regular fa-star" onclick="setPlaceRating(3)"></i>
+                            <i class="fa-regular fa-star" onclick="setPlaceRating(4)"></i>
+                            <i class="fa-regular fa-star" onclick="setPlaceRating(5)"></i>
+                        </div>
+                        <input type="hidden" id="placeRating" value="0">
+                        <textarea id="placeComment" class="form-control mb-2" rows="2" placeholder="บรรยากาศเป็นไงบ้าง?"></textarea>
+                        <button class="btn btn-primary btn-sm rounded-pill" onclick="submitPlaceReview()">โพสต์รีวิว</button>
+                    </div>
+
+                    <div id="placeReviewsList" style="max-height: 250px; overflow-y: auto;">
+                        <div class="text-center text-muted py-3">กำลังตรวจสอบรีวิว...</div>
+                    </div>
+                </div>
+                
+                <div class="modal-footer border-0 px-4 pb-4">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">ปิด</button>
+                    <button type="button" class="btn btn-danger rounded-pill px-4 fw-bold" id="btnDeletePlace" onclick="">
+                        <i class="fa-solid fa-trash me-2"></i> ลบสถานที่นี้
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -106,140 +238,311 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet-control-geocoder/dist/Control.Geocoder.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // --- 1. Initialization & Globals ---
         const urlParams = new URLSearchParams(window.location.search);
-        const tripId = urlParams.get('id');
-        if (!tripId) window.location.href = '/dashboard.html';
-
+        const tripId = urlParams.get('id'); 
+        if(!tripId) window.location.href='/dashboard.html';
+        
+        // Init Map
         const map = L.map('map').setView([13.7563, 100.5018], 6);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{maxZoom: 20, subdomains: ['mt0','mt1','mt2','mt3']}).addTo(map);
+        
+        // Geocoder Control (Search Box)
+        const geocoder = L.Control.geocoder({ defaultMarkGeocode: false })
+            .on('markgeocode', e => { 
+                map.setView(e.geocode.center, 16); 
+                openAddModal(e.geocode.center.lat, e.geocode.center.lng, e.geocode.name); 
+            })
+            .addTo(map);
 
-        // --- 🔍 เพิ่มระบบค้นหา (Search Box) ---
-        L.Control.geocoder({
-            defaultMarkGeocode: false, // ไม่ต้องปักหมุดออโต้ (เดี๋ยวเรากดปักเอง)
-            placeholder: 'ค้นหาสถานที่... (เช่น Tokyo)',
-            errorMessage: 'ไม่พบสถานที่'
-        })
-        .on('markgeocode', function(e) {
-            const latlng = e.geocode.center;
-            const name = e.geocode.name;
-            
-            // บินไปที่จุดนั้น
-            map.flyTo(latlng, 16);
-            
-            // (Optional) เปิด Modal ให้บันทึกเลยไหม? หรือรอ User คลิกเอง?
-            // วิธีนี้ดีสุด: บินไปให้เห็นก่อน แล้วถ้า User อยากบันทึก ให้กดที่แผนที่เอง
-        })
-        .addTo(map);
-        // ---------------------------------------
+      
+        let markers = []; 
+        let routingControl = null; 
+        let myLocMarker = null;
+        let placeDetailModal = null;
+        let addPlaceModal = null;
+        let currentDetailPlaceId = null; // ID ของสถานที่ในตาราง places (ของทริปนี้)
+        let linkedRecommendedId = null;  // ID ของสถานที่ในตารางแนะนำ (ถ้าชื่อตรงกัน)
 
-        let markers = [];
-
-        async function loadTripDetails() {
+        // --- 2. Load Data Function (Core) ---
+        async function loadData() {
             try {
-                const res = await fetch(`/api/trips/${tripId}`);
-                if (!res.ok) throw new Error('Network response was not ok');
-                const data = await res.json();
-
-                document.getElementById('tripTitle').innerText = data.trip.name;
-                const placeList = document.getElementById('placeList');
-                placeList.innerHTML = ''; 
-                
-                markers.forEach(m => map.removeLayer(m));
-                markers = [];
-
-                let totalCost = 0;
-                if(data.places.length > 0) {
-                    const lastPlace = data.places[data.places.length - 1];
-                    map.setView([lastPlace.latitude, lastPlace.longitude], 10);
+                // 2.1 Check User & Update Navbar
+                const authRes = await fetch('/api/user/me');
+                if(authRes.ok) {
+                    const user = await authRes.json();
+                    const seed = user.avatar_seed || user.username;
+                    const avatarUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${seed}`;
+                    
+                    document.getElementById('navAuthSection').innerHTML = `
+                        <div class="dropdown me-3">
+                            <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle text-dark fw-bold" data-bs-toggle="dropdown">
+                                <img src="${avatarUrl}" style="width:35px;height:35px;border-radius:50%;margin-right:10px;border:1px solid #eee;"> 
+                                ${user.username}
+                            </a>
+                            <ul class="dropdown-menu border-0 shadow-sm mt-2">
+                                <li><a class="dropdown-item" href="/profile.html">โปรไฟล์</a></li>
+                                <li><a class="dropdown-item text-danger" href="/logout">ออกจากระบบ</a></li>
+                            </ul>
+                        </div>`;
                 }
 
-                data.places.forEach((place, index) => {
-                    const price = Number(place.price) || 0;
-                    totalCost += price;
-                    placeList.innerHTML += `
-                        <div class="place-item p-3 border-bottom" onclick="focusMap(${place.latitude}, ${place.longitude})">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <h6 class="mb-1 fw-bold">${index + 1}. ${place.name}</h6>
-                                    <small class="text-muted"><i class="fa-solid fa-note-sticky"></i> ${place.description || '-'}</small>
+                // 2.2 Load Trip Data
+                const res = await fetch(`/api/trips/${tripId}`);
+                if(!res.ok) throw new Error("Load failed");
+                const data = await res.json();
+
+                // Update Header
+                document.getElementById('tripTitle').innerText = data.trip.name;
+                document.getElementById('tripDate').innerHTML = `<i class="fa-solid fa-calendar me-2"></i> ${new Date(data.trip.start_date).toLocaleDateString()} - ${new Date(data.trip.end_date).toLocaleDateString()}`;
+                document.getElementById('tripCover').src = data.trip.cover_image || 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1200&q=80';
+
+                // 2.3 Reset Map & List
+                markers.forEach(m => map.removeLayer(m)); 
+                markers = [];
+                if (routingControl) { map.removeControl(routingControl); routingControl = null; }
+                document.getElementById('routeStats').style.display = 'none';
+
+                const list = document.getElementById('placeList'); 
+                list.innerHTML = '';
+                let totalCost = 0; 
+                let waypoints = [];
+
+                if (data.places.length === 0) {
+                    list.innerHTML = '<div class="text-center text-muted py-4">ยังไม่มีสถานที่<br>กดปุ่มเพิ่มสถานที่ เพื่อเริ่มปักหมุด!</div>';
+                }
+
+                // 2.4 Render Places Loop
+                data.places.forEach((p, i) => {
+                    totalCost += Number(p.price); 
+                    waypoints.push(L.latLng(p.latitude, p.longitude));
+                    
+                    const placeDataStr = JSON.stringify(p).replace(/"/g, '&quot;');
+
+                    // Add to Timeline
+                    list.innerHTML += `
+                        <div class="timeline-item">
+                            <div class="timeline-card" onclick="openPlaceDetail(${placeDataStr})">
+                                <div class="d-flex justify-content-between">
+                                    <h5 class="fw-bold mb-1">${i+1}. ${p.name}</h5>
+                                    <span class="text-muted small"><i class="fa-solid fa-circle-info"></i></span>
                                 </div>
-                                <div class="text-end">
-                                    <span class="badge bg-secondary rounded-pill d-block mb-2">${price.toLocaleString()} ฿</span>
-                                    <button class="btn btn-sm btn-outline-danger border-0 delete-btn" onclick="deletePlace(${place.id}, event)">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </div>
+                                <p class="text-muted small mb-2 text-truncate">${p.description || '-'}</p>
+                                <span class="price-tag"><i class="fa-solid fa-coins me-1"></i> ${Number(p.price).toLocaleString()} ฿</span>
                             </div>
-                        </div>
-                    `;
-                    const marker = L.marker([place.latitude, place.longitude]).addTo(map)
-                        .bindPopup(`<div class="text-center"><b>${place.name}</b><br><span class="badge bg-success my-1">ค่าใช้จ่าย: ${price.toLocaleString()} บาท</span><br><small>${place.description || ''}</small></div>`);
-                    markers.push(marker);
+                        </div>`;
+                    
+                    // Add to Map
+                    const m = L.marker([p.latitude, p.longitude]).addTo(map)
+                        .bindPopup(`<b>${i+1}. ${p.name}</b>`)
+                        .bindTooltip(`${i+1}. ${p.name}`, { permanent: true, direction: 'bottom', className: 'map-label', offset: [0, 10] });
+                    markers.push(m);
                 });
-                document.getElementById('totalBudget').innerText = totalCost.toLocaleString();
+
+                document.getElementById('totalCost').innerText = totalCost.toLocaleString() + ' ฿';
+
+                // 2.5 Routing Calculation
+                if (waypoints.length > 1) {
+                    routingControl = L.Routing.control({ 
+                        waypoints, 
+                        routeWhileDragging: false, 
+                        draggableWaypoints: false, 
+                        addWaypoints: false, 
+                        createMarker: () => null, 
+                        lineOptions: { styles: [{color: '#11998e', opacity: 0.8, weight: 6}] }, 
+                        show: false 
+                    }).addTo(map);
+                    
+                    routingControl.on('routesfound', e => {
+                        const s = e.routes[0].summary;
+                        document.getElementById('distVal').innerText = (s.totalDistance/1000).toFixed(1) + " km";
+                        document.getElementById('timeVal').innerText = Math.round(s.totalTime/60) + " min";
+                        document.getElementById('routeStats').style.display = 'block';
+                    });
+                } else if (data.places.length > 0) {
+                    map.setView([data.places[0].latitude, data.places[0].longitude], 12);
+                }
+
             } catch (err) { console.error(err); }
         }
 
-        function focusMap(lat, lng) { map.flyTo([lat, lng], 14); }
+        // --- 3. Place Detail & Smart Linking Logic ---
+        async function openPlaceDetail(place) {
+            if(!placeDetailModal) placeDetailModal = new bootstrap.Modal(document.getElementById('placeDetailModal'));
+            
+            // Set UI Data
+            document.getElementById('detailName').innerText = place.name;
+            document.getElementById('detailDesc').innerText = place.description || 'ไม่มีรายละเอียดเพิ่มเติม';
+            document.getElementById('detailPrice').innerText = place.price > 0 ? `${Number(place.price).toLocaleString()} ฿` : 'FREE';
+            document.getElementById('detailImg').src = 'https://via.placeholder.com/800x400?text=Travel+Photo'; 
+            
+            // Set Delete Action
+            document.getElementById('btnDeletePlace').onclick = () => delPlace(place.id);
 
-        async function deletePlace(id, event) {
-            event.stopPropagation();
-            if (!confirm('ต้องการลบสถานที่นี้ใช่ไหม?')) return;
-            const res = await fetch(`/api/places/${id}`, { method: 'DELETE' });
-            if (res.ok) loadTripDetails();
+            // Reset Review Section
+            document.getElementById('placeReviewForm').classList.add('d-none');
+            document.getElementById('btnWriteReview').classList.add('d-none');
+            document.getElementById('placeReviewsList').innerHTML = '<div class="text-center text-muted">กำลังค้นหารีวิว...</div>';
+
+            placeDetailModal.show();
+
+            // ค้นหาชื่อสถานที่นี้ในระบบกลาง เพื่อดึงรูปและรีวิวมาแสดง
+            try {
+                const searchRes = await fetch(`/api/search?q=${encodeURIComponent(place.name)}`);
+                const searchData = await searchRes.json();
+
+                if (searchData.length > 0) {
+                    // เจอ 
+                    const match = searchData[0];
+                    linkedRecommendedId = match.id;
+                    
+                    if(match.image_url) document.getElementById('detailImg').src = match.image_url;
+                    
+                    // เปิดปุ่มเขียนรีวิว
+                    document.getElementById('btnWriteReview').classList.remove('d-none');
+                    
+                    // โหลดรีวิว
+                    loadPlaceReviews(linkedRecommendedId);
+                } else {
+                    // ไม่เจอ 
+                    document.getElementById('placeReviewsList').innerHTML = '<div class="text-center text-muted small py-3">สถานที่นี้เป็นหมุดส่วนตัว ยังไม่มีรีวิวในชุมชน</div>';
+                    linkedRecommendedId = null;
+                }
+            } catch (err) { console.error(err); }
         }
 
-        const addModal = new bootstrap.Modal(document.getElementById('addPlaceModal'));
-        map.on('click', function(e) {
-            document.getElementById('latInput').value = e.latlng.lat;
-            document.getElementById('lngInput').value = e.latlng.lng;
-            document.getElementById('coordDisplay').innerText = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
-            document.getElementById('placeName').value = '';
-            document.getElementById('placeDesc').value = '';
-            document.getElementById('placePrice').value = ''; 
-            addModal.show();
-            setTimeout(() => document.getElementById('placeName').focus(), 500);
-        });
+        async function loadPlaceReviews(recId) {
+            try {
+                const res = await fetch(`/api/places/${recId}/reviews`);
+                const reviews = await res.json();
+                const list = document.getElementById('placeReviewsList');
+                list.innerHTML = '';
+                
+                if(reviews.length === 0) {
+                    list.innerHTML = '<div class="text-center text-muted py-3">ยังไม่มีรีวิว เป็นคนแรกเลยไหม?</div>';
+                    return;
+                }
+                
+                reviews.forEach(r => {
+                    let stars = ''; for(let i=1;i<=5;i++) stars += i<=r.rating ? '<i class="fa-solid fa-star text-warning small"></i>' : '<i class="fa-regular fa-star text-muted small"></i>';
+                    list.innerHTML += `
+                        <div class="review-item d-flex">
+                            <img src="https://api.dicebear.com/7.x/adventurer/svg?seed=${r.username}" class="review-avatar">
+                            <div>
+                                <div class="d-flex align-items-center mb-1">
+                                    <h6 class="mb-0 fw-bold me-2">${r.username}</h6>
+                                    <div>${stars}</div>
+                                </div>
+                                <p class="text-muted mb-0 small">${r.comment}</p>
+                            </div>
+                        </div>`;
+                });
+            } catch(e) { }
+        }
 
-        document.getElementById('addPlaceForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const payload = {
-                trip_id: tripId,
-                name: document.getElementById('placeName').value,
-                description: document.getElementById('placeDesc').value,
-                price: document.getElementById('placePrice').value || 0, 
-                latitude: document.getElementById('latInput').value,
-                longitude: document.getElementById('lngInput').value
-            };
-            const res = await fetch('/api/places', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if(res.ok) { addModal.hide(); loadTripDetails(); }
-        });
-
-        // --- Locate Me ---
-        document.getElementById('locateBtn').addEventListener('click', () => {
-            if (!navigator.geolocation) return alert('Browser ไม่รองรับ GPS');
-            const btnIcon = document.querySelector('#locateBtn i');
-            btnIcon.className = 'fa-solid fa-circle-notch fa-spin text-primary';
+        // --- 4. Review Interactions ---
+        function togglePlaceReviewForm() { document.getElementById('placeReviewForm').classList.toggle('d-none'); }
+        
+        function setPlaceRating(n) { 
+            document.getElementById('placeRating').value = n; 
+            document.querySelectorAll('#placeReviewForm .fa-star').forEach((s, i) => { 
+                if(i<n) {s.classList.remove('fa-regular');s.classList.add('fa-solid');} 
+                else {s.classList.remove('fa-solid');s.classList.add('fa-regular');} 
+            }); 
+        }
+        
+        async function submitPlaceReview() {
+            if(!linkedRecommendedId) return;
+            const rating = document.getElementById('placeRating').value;
+            const comment = document.getElementById('placeComment').value;
+            if(rating==0) { Swal.fire('ให้ดาวด้วยครับ', '', 'warning'); return; }
             
-            navigator.geolocation.getCurrentPosition((position) => {
-                const lat = position.coords.latitude;
-                const lng = position.coords.longitude;
-                map.flyTo([lat, lng], 16);
-                L.circleMarker([lat, lng], { color: 'white', fillColor: '#0d6efd', fillOpacity: 1, radius: 8, weight: 2 }).addTo(map).bindPopup("คุณอยู่ที่นี่").openPopup();
-                btnIcon.className = 'fa-solid fa-location-crosshairs fa-lg text-primary';
-            }, () => {
-                alert('ไม่สามารถระบุตำแหน่งได้');
-                btnIcon.className = 'fa-solid fa-location-crosshairs fa-lg text-danger';
-            });
+            try {
+                const res = await fetch(`/api/places/${linkedRecommendedId}/reviews`, {
+                    method: 'POST', headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify({rating, comment})
+                });
+                if(res.ok) {
+                    document.getElementById('placeComment').value = ''; setPlaceRating(0); togglePlaceReviewForm();
+                    loadPlaceReviews(linkedRecommendedId); Swal.fire('รีวิวแล้ว!', '', 'success');
+                }
+            } catch(e) { Swal.fire('Error', 'ส่งรีวิวไม่สำเร็จ', 'error'); }
+        }
+
+        // --- 5. Add Place Logic & Map Utilities ---
+        
+        // Geolocation
+        function locateMe() { 
+            const btn = document.querySelector('.btn-locate'); 
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            navigator.geolocation.getCurrentPosition(p => { 
+                const lat=p.coords.latitude, lng=p.coords.longitude; 
+                map.flyTo([lat, lng], 16); 
+                if(myLocMarker) map.removeLayer(myLocMarker); 
+                myLocMarker=L.circleMarker([lat,lng],{radius:8,fillColor:"#11998e",color:"#fff",weight:3,opacity:1,fillOpacity:1}).addTo(map).bindPopup("ฉันอยู่นี่").openPopup();
+                btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>';
+            }, () => { 
+                btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i>'; 
+                Swal.fire('Error','ระบุตำแหน่งไม่ได้','error'); 
+            }); 
+        }
+        
+        // Add Place Modal
+        function openAddModal(lat, lng, name = '') { 
+            if(!addPlaceModal) addPlaceModal = new bootstrap.Modal(document.getElementById('addPlaceModal'));
+            document.getElementById('lat').value=lat; 
+            document.getElementById('lng').value=lng; 
+            document.getElementById('pName').value=name; 
+            document.getElementById('pDesc').value=''; 
+            document.getElementById('pPrice').value='0'; 
+            addPlaceModal.show(); 
+            setTimeout(()=>document.getElementById('pName').focus(), 500); 
+        }
+
+        function activateMapSelection() { 
+            document.getElementById('map').scrollIntoView({behavior:'smooth'}); 
+            document.getElementById('map').classList.add('map-add-mode'); 
+            Swal.fire({toast:true,position:'top',icon:'info',title:'👉 จิ้มแผนที่เพื่อปักหมุด',showConfirmButton:false,timer:3000}); 
+        }
+        
+        map.on('click', e => { 
+            document.getElementById('map').classList.remove('map-add-mode'); 
+            openAddModal(e.latlng.lat, e.latlng.lng); 
         });
 
-        loadTripDetails();
+        // Add Place Submit
+        document.getElementById('addPlaceForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            await fetch('/api/places', { 
+                method:'POST', headers:{'Content-Type':'application/json'}, 
+                body:JSON.stringify({ 
+                    trip_id: tripId, 
+                    name: document.getElementById('pName').value, 
+                    description: document.getElementById('pDesc').value, 
+                    price: document.getElementById('pPrice').value, 
+                    latitude: document.getElementById('lat').value, 
+                    longitude: document.getElementById('lng').value 
+                }) 
+            });
+            addPlaceModal.hide(); 
+            loadData();
+        });
+
+        // Delete Place
+        async function delPlace(id) {
+            placeDetailModal.hide(); 
+            if((await Swal.fire({title:'ลบสถานที่นี้?',text:'กู้คืนไม่ได้นะครับ',icon:'warning',showCancelButton:true,confirmButtonColor:'#d33',confirmButtonText:'ลบเลย'})).isConfirmed) { 
+                await fetch(`/api/places/${id}`, {method:'DELETE'}); 
+                loadData(); 
+            }
+        }
+
+        // Init
+        loadData();
     </script>
 </body>
 </html>

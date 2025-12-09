@@ -3,34 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - Travel Planner</title>
+    <title>สมัครสมาชิก - Travel Planner Pro</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✈️</text></svg>">
+    
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body { background-color: #e9ecef; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .card { width: 100%; max-width: 400px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        /* === Global Styles === */
+        body { 
+            font-family: 'IBM Plex Sans Thai', sans-serif; 
+            height: 100vh; 
+            overflow: hidden; 
+            background-color: #fff; 
+        }
+        
+        .login-container { height: 100%; width: 100%; }
+        
+        /* === Left Side: Image (Mountains) === */
+        .bg-image {
+            background-image: url('https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80'); 
+            background-size: cover; 
+            background-position: center;
+            height: 100%; 
+            position: relative;
+        }
+        
+        .bg-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.6));
+            display: flex; flex-direction: column; justify-content: flex-end; 
+            padding: 60px; color: white;
+        }
+
+        .btn-back {
+            position: absolute; top: 20px; left: 20px;
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px);
+            color: white; border: none; padding: 10px 20px; border-radius: 30px;
+            font-size: 0.9rem; font-weight: 500; text-decoration: none; transition: 0.3s;
+        }
+        .btn-back:hover { background: rgba(255, 255, 255, 0.4); color: white; }
+
+        /* === Right Side: Form === */
+        .login-form-container {
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 50px 80px; height: 100%; overflow-y: auto;
+        }
+
+        .brand-logo { 
+            color: #11998e; font-weight: 700; font-size: 1.5rem; 
+            margin-bottom: 30px; display: block; text-decoration: none; 
+        }
+        
+        /* Inputs */
+        .form-control {
+            border: 2px solid #f1f3f5;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1rem;
+            transition: 0.3s;
+        }
+        .form-control:focus {
+            background-color: #fff;
+            border-color: #11998e;
+            box-shadow: 0 0 0 4px rgba(17, 153, 142, 0.1);
+        }
+        .form-label { font-weight: 500; color: #495057; font-size: 0.9rem; margin-bottom: 8px; }
+
+        /* Buttons */
+        .btn-primary {
+            background-color: #11998e; border: none;
+            padding: 16px; border-radius: 12px;
+            font-weight: 600; font-size: 1rem; letter-spacing: 0.5px;
+            width: 100%; margin-top: 20px; transition: 0.3s;
+        }
+        .btn-primary:hover { 
+            background-color: #0e857b; 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 20px rgba(17, 153, 142, 0.2); 
+        }
+        .btn-primary:disabled { background-color: #ccc; transform: none; box-shadow: none; cursor: not-allowed; }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .bg-image { display: none; }
+            .login-form-container { padding: 40px 30px; }
+        }
     </style>
 </head>
 <body>
-    <div class="card p-4">
-        <h3 class="text-center mb-4 text-success">📝 สมัครสมาชิกใหม่</h3>
-        <form id="registerForm">
-            <div class="mb-3">
-                <label>ตั้งชื่อผู้ใช้ (Username)</label>
-                <input type="text" id="regUser" class="form-control" required placeholder="ภาษาอังกฤษเท่านั้น">
+
+    <div class="row g-0 login-container">
+        
+        <div class="col-md-6 col-lg-7 d-none d-md-block bg-image">
+            <a href="/" class="btn-back"><i class="fa-solid fa-arrow-left me-2"></i>กลับหน้าหลัก</a>
+            <div class="bg-overlay">
+                <h1 class="fw-bold display-5">การเดินทางครั้งใหม่<br>กำลังรอคุณอยู่</h1>
+                <p class="fs-5 opacity-75 mt-2">เข้าร่วมกับนักเดินทางทั่วโลก</p>
             </div>
-            <div class="mb-3">
-                <label>รหัสผ่าน (Password)</label>
-                <input type="password" id="regPass" class="form-control" required placeholder="อย่างน้อย 4 ตัวอักษร">
+        </div>
+
+        <div class="col-md-6 col-lg-5 bg-white">
+            <div class="login-form-container">
+                <a href="/" class="brand-logo"><i class="fa-solid fa-paper-plane me-2"></i>Travel Planner Pro</a>
+                
+                <h2 class="fw-bold mb-2">สร้างบัญชีใหม่</h2>
+                <p class="text-muted mb-4">กรอกข้อมูลเพื่อเริ่มต้นใช้งานฟรี</p>
+
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label">ชื่อผู้ใช้</label>
+                        <input type="text" class="form-control" id="regUser" placeholder="ตั้งชื่อผู้ใช้" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">รหัสผ่าน</label>
+                        <input type="password" class="form-control" id="regPass" placeholder="ตั้งรหัสผ่าน (อย่างน้อย 6 ตัว)" required>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">ยืนยันรหัสผ่าน</label>
+                        <input type="password" class="form-control" id="regConfirm" placeholder="พิมพ์รหัสผ่านอีกครั้ง" required>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-register">สมัครสมาชิก</button>
+                </form>
+
+                <p class="text-center mt-4 text-muted">
+                    มีบัญชีอยู่แล้ว? <a href="/login.html" class="text-primary fw-bold text-decoration-none">เข้าสู่ระบบ</a>
+                </p>
             </div>
-            <div class="mb-3">
-                <label>ยืนยันรหัสผ่าน</label>
-                <input type="password" id="regConfirmPass" class="form-control" required>
-            </div>
-            <button type="submit" class="btn btn-success w-100">ลงทะเบียน</button>
-            <div class="text-center mt-3">
-                <a href="/login.html" class="text-decoration-none">มีบัญชีแล้ว? เข้าสู่ระบบ</a>
-            </div>
-        </form>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -38,30 +144,54 @@
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const username = document.getElementById('regUser').value;
-            const password = document.getElementById('regPass').value;
-            const confirm = document.getElementById('regConfirmPass').value;
+            // Get Values
+            const u = document.getElementById('regUser').value;
+            const p = document.getElementById('regPass').value;
+            const c = document.getElementById('regConfirm').value;
 
-            // Validation พื้นฐาน
-            if (password !== confirm) {
-                return Swal.fire('Error', 'รหัสผ่านไม่ตรงกัน', 'error');
+            // 1. Validate Password Match
+            if (p !== c) {
+                Swal.fire({ icon: 'warning', title: 'รหัสผ่านไม่ตรงกัน', confirmButtonColor: '#f39c12' });
+                return;
             }
 
-            // ยิง API
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
+            // 2. Validate Password Length
+            if (p.length < 6) {
+                Swal.fire({ icon: 'warning', title: 'รหัสผ่านสั้นเกินไป', text: 'กรุณาตั้งรหัสผ่านอย่างน้อย 6 ตัวอักษร', confirmButtonColor: '#f39c12' });
+                return;
+            }
 
-            const result = await res.json();
+            // Loading State
+            const btn = document.querySelector('.btn-register');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>กำลังสร้างบัญชี...';
+            btn.disabled = true;
 
-            if (result.success) {
-                Swal.fire('สำเร็จ!', 'สมัครสมาชิกเรียบร้อย', 'success').then(() => {
-                    window.location.href = '/login.html';
+            try {
+                const res = await fetch('/api/register', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({username: u, password: p}) 
                 });
-            } else {
-                Swal.fire('ล้มเหลว', result.message, 'error');
+                const data = await res.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        icon: 'success', 
+                        title: 'สมัครสมาชิกสำเร็จ!', 
+                        text: 'ยินดีต้อนรับสู่ครอบครัวนักเดินทาง',
+                        confirmButtonText: 'ไปหน้า Login', 
+                        confirmButtonColor: '#11998e'
+                    }).then(() => window.location.href = '/login.html');
+                } else {
+                    Swal.fire('เกิดข้อผิดพลาด', data.message, 'error');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            } catch (err) {
+                Swal.fire('Error', 'เกิดข้อผิดพลาดในการเชื่อมต่อ', 'error');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         });
     </script>

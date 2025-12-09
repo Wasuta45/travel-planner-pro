@@ -1,13 +1,19 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
+
+// ใช้ createPool เพื่อประสิทธิภาพที่ดีกว่า
 const pool = mysql.createPool({
-   host: 'localhost',  
-   user: 'root',
-   password: '',
-   database: 'travel_planner_pro',
-waitForConnections: true,
-connectionLimit: 10,
-queueLimit: 0
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME || 'test', // ใส่ default เป็น test ตามที่คุณสร้างไว้
+    port: process.env.DB_PORT || 4000,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0,
+    ssl: {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true
+    }
 });
 
-const db = pool.promise();
-module.exports = db;
+module.exports = pool;
