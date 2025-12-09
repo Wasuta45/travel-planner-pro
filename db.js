@@ -11,7 +11,7 @@ const connection = mysql.createPool({
   port: process.env.TIDB_PORT || 4000,
   ssl: {
     minVersion: 'TLSv1.2',
-    rejectUnauthorized: true
+    rejectUnauthorized: false
   }
 });
 
