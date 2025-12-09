@@ -2,6 +2,7 @@ const mysql = require('mysql2/promise');
 
 // ใช้ createPool เพื่อประสิทธิภาพที่ดีกว่า
 // โค้ดที่ต้องแก้ไขใน db.js
+console.log(process.env.TIDB_HOST)
 const connection = mysql.createPool({
   host: process.env.TIDB_HOST,        // 👈 ใช้ TIDB_HOST 
   user: process.env.TIDB_USER,        // 👈 ใช้ TIDB_USER
