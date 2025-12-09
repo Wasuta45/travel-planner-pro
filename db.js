@@ -1,19 +1,17 @@
 const mysql = require('mysql2/promise');
 
 // ใช้ createPool เพื่อประสิทธิภาพที่ดีกว่า
-const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME || 'test', // ใส่ default เป็น test ตามที่คุณสร้างไว้
-    port: process.env.DB_PORT || 4000,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0,
-    ssl: {
-        minVersion: 'TLSv1.2',
-        rejectUnauthorized: true
-    }
+// โค้ดที่ต้องแก้ไขใน db.js
+const connection = mysql.createPool({
+  host: process.env.TIDB_HOST,        // 👈 ใช้ TIDB_HOST 
+  user: process.env.TIDB_USER,        // 👈 ใช้ TIDB_USER
+  password: process.env.TIDB_PASSWORD,  // 👈 ใช้ TIDB_PASSWORD
+  database: process.env.TIDB_DATABASE,  // 👈 ใช้ TIDB_DATABASE
+  port: process.env.TIDB_PORT || 4000,
+  ssl: {
+    minVersion: 'TLSv1.2',
+    rejectUnauthorized: true
+  }
 });
 
-module.exports = pool;
+module.exports = connection;
